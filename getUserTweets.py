@@ -28,7 +28,7 @@ def getapi():
     return api
 
 
-def getUserTweets():
+def getUserTweetsByUserName():
     api = getapi()
 
     # print api.VerifyCredentials()
@@ -41,5 +41,21 @@ def getUserTweets():
         for s in statuses:
             print s.text
 
+def getUserTweetsByUserID():
+    api = getapi()
 
-getUserTweets()
+    # print api.VerifyCredentials()
+
+    userid = 'blah'
+
+    while userid != "":
+        userid = raw_input("")
+        user = api.GetUser(userid)
+        print user
+        username = user.screen_name
+        statuses = api.GetUserTimeline(screen_name=user)
+        for s in statuses:
+            print s.text
+
+
+getUserTweetsByUserID()
