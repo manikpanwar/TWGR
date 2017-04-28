@@ -26,9 +26,9 @@ def train_bow(genres, tweets):
 					conditional_freqs[new_genre][word] = 1.0
 				words_by_genre[new_genre] += 1
 
-		for key in conditional_freqs.keys(): # iterating over genres
-			for val in conditional_freqs[key].keys(): # iterating over words
-				conditional_freqs[key][val] /= words_by_genre[key] # turning counts into frequencies
+	for key in conditional_freqs.keys(): # iterating over genres
+		for val in conditional_freqs[key].keys(): # iterating over words
+			conditional_freqs[key][val] /= words_by_genre[key] # turning counts into frequencies
 
 	return(conditional_freqs, genre_freqs, words_by_genre)
 
@@ -56,12 +56,12 @@ def test_bow(conditional_freqs, genre_freqs, words_by_genre, tweets, genres):
 		keys = [x for x,y in dic.items() if y ==maxx] # here, we return all genres that maximize the probability above 
 													  # (not just the first appearance)
 
-		test_preds.append(keys)
-		accuracy_count = 0
-		for i in xrange(len(genres)):
-			if genres[i] in test_preds[i]:
-				accuracy_count += 1
-		print("percent accuracy, :", accuracy_count/float(len(genres)))
+	test_preds.append(keys)
+	accuracy_count = 0
+	for i in xrange(len(genres)):
+		if genres[i] in test_preds[i]:
+			accuracy_count += 1
+	print("percent accuracy, :", accuracy_count/float(len(genres)))
 
 	return(test_preds)
 
