@@ -1,3 +1,6 @@
+# takes in a list of genres (by individual), and a list of corresponding tweets for those individuals, and returns a 
+# conditional frequency dictionary that contains P(word | genre) probabilities, as well as a dictionary of marginal 
+# genre frequencies and a dictionary of total word counts by genre
 def train_bow(genres, tweets):
 
 	Genres_set = set(genres)
@@ -30,6 +33,8 @@ def train_bow(genres, tweets):
 	return(conditional_freqs, genre_freqs, words_by_genre)
 
 
+# takes in a trained conditional frequency dicationary, a genre frequency dicationary, a word frequency by genre dictionary, 
+# and a list of tweets and genres (test data), and returns the test predictoins for that testing set. 
 def test_bow(conditional_freqs, genre_freqs, words_by_genre, tweets, genres):
 	Genres_set = set(genres)
 	test_preds = []
@@ -52,5 +57,11 @@ def test_bow(conditional_freqs, genre_freqs, words_by_genre, tweets, genres):
 													  # (not just the first appearance)
 
 		test_preds.append(keys)
+		accuracy_count = 0
+		for i in xrange(len(genres)):
+			if genres[i] in test_preds[i]:
+				accuracy_count += 1
+		print("percent accuracy, :", accuracy_count/float(len(genres)))
+
 	return(test_preds)
 
