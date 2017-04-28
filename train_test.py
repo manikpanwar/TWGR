@@ -11,19 +11,21 @@ def train_bow(genres, tweets):
 
 	for i in xrange(len(tweets)):
 		new_tweet = tweets[i].split() # Splitting into a list of words
-		new_genre = genres[i] # getting the genre that corresponds to this tweet
-		if new_genre not in words_by_genre.keys(): 
-			words_by_genre[new_genre] = 0.0
-		for word in new_tweet: # "training" the conditional_freqs array
-			if word in conditional_freqs[new_genre].keys(): 
-				conditional_freqs[new_genre][word] += 1.0
-			else:
-				conditional_freqs[new_genre][word] = 1.0
-			words_by_genre[new_genre] += 1
+		if len(new_tweet) >= 100:
+			new_tweet = new_tweet[0:100]
+			new_genre = genres[i] # getting the genre that corresponds to this tweet
+			if new_genre not in words_by_genre.keys(): 
+				words_by_genre[new_genre] = 0.0
+			for word in new_tweet: # "training" the conditional_freqs array
+				if word in conditional_freqs[new_genre].keys(): 
+					conditional_freqs[new_genre][word] += 1.0
+				else:
+					conditional_freqs[new_genre][word] = 1.0
+				words_by_genre[new_genre] += 1
 
-	for key in conditional_freqs.keys(): # iterating over genres
-		for val in conditional_freqs[key].keys(): # iterating over words
-			conditional_freqs[key][val] /= words_by_genre[key] # turning counts into frequencies
+		for key in conditional_freqs.keys(): # iterating over genres
+			for val in conditional_freqs[key].keys(): # iterating over words
+				conditional_freqs[key][val] /= words_by_genre[key] # turning counts into frequencies
 
 	return(conditional_freqs, genre_freqs, words_by_genre)
 
@@ -37,7 +39,10 @@ def test_bow(conditional_freqs, genre_freqs, words_by_genre, tweets, genres):
 		for genre in Genres_set:
 			new_prob = 1.0
 			for word in new_tweet:
-				new_prob *= conditional_freqs[genre][word] # P(word1 | genre) * P(word2 | genre) * * * * P(wordn | genre)
+				if conditional_freqs[genre][word] != 0:
+					new_prob *= conditional_freqs[genre][word] # P(word1 | genre) * P(word2 | genre) * * * * P(wordn | genre)
+				else:
+					new_prob *= 1/float(words_by_genre[genre]) # sort of like "smoothing"
 			new_prob *= genre_freqs[genre] # * P(genre)
 			probs_by_genre[genre] = new_prob
 
