@@ -41,21 +41,32 @@ def getUserTweetsByUserName():
         for s in statuses:
             print s.text
 
-def getUserTweetsByUserID():
+def getUserTweetsByUserID(userId):
+    # print "Getting API"
     api = getapi()
-
+    # print "Got API"
     # print api.VerifyCredentials()
+    user = None
+    try:
+        user = api.GetUser(userId)
+    except Exception as e:
+        print "User name getting error"
+        return ""
+    
+    
+    username = user.screen_name
+    # print username, 
+    statuses = ""
+    try:
+        statuses = api.GetUserTimeline(screen_name=username)
+    except Exception as e:
+        print "Error"
+        return ""
+    
+    ans = ""
+    for s in statuses:
+        ans += s.text + "\n"
+    return ans
 
-    userid = 'blah'
 
-    while userid != "":
-        userid = raw_input("")
-        user = api.GetUser(userid)
-        print user
-        username = user.screen_name
-        statuses = api.GetUserTimeline(screen_name=user)
-        for s in statuses:
-            print s.text
-
-
-getUserTweetsByUserID()
+# getUserTweetsByUserID()
