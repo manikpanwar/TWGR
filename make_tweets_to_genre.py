@@ -1,6 +1,18 @@
 import getUserTweets as gut 
 import csv
+import train_test as tt
 
+def readFile(filename, mode="rt"):
+    # From 15-112 class notes
+    # rt = "read text"
+    with open(filename, mode) as fin:
+        return fin.read()
+
+def writeFile(filename, contents, mode="wt"):
+    # From 15-112 class notes
+    # wt = "write text"
+    with open(filename, mode) as fout:
+        fout.write(contents)
 
 def readCsv():
     with open('output.csv', 'rb') as csvfile:
@@ -34,8 +46,8 @@ def writeCsv(d, users = None):
 
 def getTweetsMap():
     d = readCsv()
-    numUsers = 100
-    numWordsPerUser = 30
+    numUsers = 50
+    numWordsPerUser = 100
     users = []
     for userId in d.keys()[:numUsers]:
         val = d[userId]
@@ -49,8 +61,48 @@ def getTweetsMap():
         # d[userId] = (val, (t.encode('utf-8')).encode('ascii', errors='ignore'))
         d[userId] = (val, (t).encode('ascii', errors='ignore'))
         # print ' '.join(tweets.split(" "))
+    return d, users
 
-    writeCsv(d, users)
+    # writeCsv(d, users)
 
-getTweetsMap()
+def writeToTextFile():
+    d, users = getTweetsMap()
+    keysIterated = d.keys()
+    if users != None:
+        keysIterated = users
+    s = ""
+    for userId in keysIterated:
+        (genre, text) = d[userId]
+        s += str(userId) + "\n"
+        s += genre + "\n"
+        s += text + "\n"
+    writeFile("extended-output1.txt", s)
+
+def readOutputToMapping():
+    s = readFile("extended-output1.txt")
+    i = 0
+    userIds = []
+    genres = []
+    tweets = []
+    for l in s.split("\n"):
+        if l == "":
+            continue
+        if i == 0:
+            print l
+            userIds += [int(l)]
+            i += 1
+        elif i == 1:
+            genres += [l]
+            i += 1
+        else:
+            text = l
+            tweets += [l]
+            i = 0
+    # genres and tweets are correct form input now to call to train_test
+    print len(genres), len(tweets)
+    tt.train_bow(genres, tweets)       
+
+
+# writeToTextFile()
+readOutputToMapping()
 
