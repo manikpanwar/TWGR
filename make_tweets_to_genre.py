@@ -79,7 +79,7 @@ def writeToTextFile():
     writeFile("extended-output1.txt", s)
 
 def readOutputToMapping():
-    s = readFile("extended-output1.txt")
+    s = readFile("extended-output2.txt")
     i = 0
     userIds = []
     genres = []
@@ -88,7 +88,7 @@ def readOutputToMapping():
         if l == "":
             continue
         if i == 0:
-            print l
+            #print l
             userIds += [int(l)]
             i += 1
         elif i == 1:
@@ -99,10 +99,23 @@ def readOutputToMapping():
             tweets += [l]
             i = 0
     # genres and tweets are correct form input now to call to train_test
-    print len(genres), len(tweets)
-    tt.train_bow(genres, tweets)       
+
+    ##############################
+    # Our own bag of words code: #
+    ##############################
+    # genre_training = genres[0:390]
+    # tweet_training = tweets[0:390]
+    # genre_testing = genres[390:416]
+    # tweet_testing = tweets[390:416]
+    # (cond_freqs, genre_freqs, words_by_genre, genre_size) = tt.train_bow(genre_training, tweet_training)
+    # tt.test_bow(cond_freqs, genre_freqs, words_by_genre, genre_size, tweet_testing, genre_testing)
+
+    #########################
+    # sklearn bag of words: #
+    #########################
+    # tt.train_test_sklearn(genres, tweets)
+
 
 
 # writeToTextFile()
 readOutputToMapping()
-
