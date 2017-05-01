@@ -26,8 +26,8 @@ def train_bow(genres, tweets, n_gram):
 		new_tweet = []
 		for item in gram_tweet:
 			new_tweet.append(" ".join(item))
-		if len(new_tweet) >= 10/n_gram:
-			new_tweet = new_tweet[0:(10/n_gram)]
+		if len(new_tweet) >= 10:
+			new_tweet = new_tweet[0:10]
 			new_genre = genres[i] # getting the genre that corresponds to this tweet
 			if new_genre not in words_by_genre.keys(): 
 				words_by_genre[new_genre] = 0.0
@@ -59,7 +59,11 @@ def test_bow(conditional_freqs, genre_freqs, words_by_genre, genre_size, tweets,
 		for genre in Genre_set:
 			new_logprob = 0.0
 			counter = 0
-			while counter < 10:
+			if len(new_tweet) >= 10:
+				stopper = 10
+			else:
+				stopper = len(new_tweet)
+			while counter < stopper:
 				if new_tweet[counter] in conditional_freqs[genre].keys():
 					new_logprob += math.log((conditional_freqs[genre][new_tweet[counter]]*words_by_genre[genre] + 1.0)/(words_by_genre[genre] + 10000)) # P(word1 | genre) * P(word2 | genre) * * * * P(wordn | genre)
 																															 # but using smoothing
@@ -79,24 +83,24 @@ def test_bow(conditional_freqs, genre_freqs, words_by_genre, genre_size, tweets,
 	for i in xrange(len(genres)):
 		if genres[i] in test_preds[i]:
 			accuracy_count += 1
-	print("percent accuracy, :", accuracy_count/float(len(genres)))
+	# print("percent accuracy, :", accuracy_count/float(len(genres)))
 
-	return(test_preds)
-
-
+	return(accuracy_count/float(len(genres)))
 
 
-def train_test_sklearn(genres, tweets):
+
+
+def train_test_sklearn(genres, tweets, i):
 	nb = MultinomialNB()
 	vect = CountVectorizer()
-	vect.fit(tweets[0:390])
-	simple_train_dtm = vect.transform(tweets[0:390])
+	vect.fit(tweets[0:i])
+	simple_train_dtm = vect.transform(tweets[0:i])
 	simple_train_dtm.toarray()
-	simple_test_dtm = vect.transform(tweets[390:416])
+	simple_test_dtm = vect.transform(tweets[i:i+20])
 	simple_test_dtm.toarray()
-	nb.fit(simple_train_dtm, genres[0:390])
+	nb.fit(simple_train_dtm, genres[0:i])
 	pred_genres = nb.predict(simple_test_dtm)
-	print(metrics.accuracy_score(genres[390:416], pred_genres))
+	return(metrics.accuracy_score(genres[i:i+20], pred_genres))
 
 
 
