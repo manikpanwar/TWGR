@@ -1,6 +1,7 @@
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn import metrics
+from nltk import ngrams
 
 import numpy as np
 import math
@@ -8,7 +9,7 @@ import math
 # takes in a list of genres (by individual), and a list of corresponding tweets for those individuals, and returns a 
 # conditional frequency dictionary that contains P(word | genre) probabilities, as well as a dictionary of marginal 
 # genre frequencies and a dictionary of total word counts by genre
-def train_bow(genres, tweets):
+def train_bow(genres, tweets, n_gram):
 
 	Genres_set = set(genres)
 	genre_freqs = {} # P(genre) dictionary
@@ -21,9 +22,12 @@ def train_bow(genres, tweets):
 		conditional_freqs[g] = {}
 
 	for i in xrange(len(tweets)):
-		new_tweet = tweets[i].split() # Splitting into a list of words
-		if len(new_tweet) >= 10:
-			new_tweet = new_tweet[0:10]
+		gram_tweet = ngrams(tweets[i].split(), n_gram) # Splitting into a list of words
+		new_tweet = []
+		for item in gram_tweet:
+			new_tweet.append(" ".join(item))
+		if len(new_tweet) >= 10/n_gram:
+			new_tweet = new_tweet[0:(10/n_gram)]
 			new_genre = genres[i] # getting the genre that corresponds to this tweet
 			if new_genre not in words_by_genre.keys(): 
 				words_by_genre[new_genre] = 0.0
@@ -43,20 +47,25 @@ def train_bow(genres, tweets):
 
 # takes in a trained conditional frequency dicationary, a genre frequency dicationary, a word frequency by genre dictionary, 
 # and a list of tweets and genres (test data), and returns the test predictoins for that testing set. 
-def test_bow(conditional_freqs, genre_freqs, words_by_genre, genre_size, tweets, genres):
+def test_bow(conditional_freqs, genre_freqs, words_by_genre, genre_size, tweets, genres, n_gram):
 	test_preds = []
 	Genre_set = set(genre_freqs.keys())
 	for tweet in tweets:
-		new_tweet = tweet.split()
+		gram_tweet = ngrams(tweet.split(), n_gram)
+		new_tweet = []
+		for item in gram_tweet:
+			new_tweet.append(" ".join(item))
 		logprobs_by_genre = {} # dictionary of the form genre : ~ P(genre | tweet)
 		for genre in Genre_set:
 			new_logprob = 0.0
-			for word in new_tweet:
-				if word in conditional_freqs[genre].keys():
-					new_logprob += math.log((conditional_freqs[genre][word]*words_by_genre[genre] + 1.0)/(words_by_genre[genre] + 10000)) # P(word1 | genre) * P(word2 | genre) * * * * P(wordn | genre)
+			counter = 0
+			while counter < 10:
+				if new_tweet[counter] in conditional_freqs[genre].keys():
+					new_logprob += math.log((conditional_freqs[genre][new_tweet[counter]]*words_by_genre[genre] + 1.0)/(words_by_genre[genre] + 10000)) # P(word1 | genre) * P(word2 | genre) * * * * P(wordn | genre)
 																															 # but using smoothing
 				else:
 					new_logprob += math.log((0 + 1.0)/(words_by_genre[genre] + 10000)) # again, using smothing
+				counter += 1
 			new_logprob += math.log(genre_freqs[genre]) # . . . * P(genre)
 			logprobs_by_genre[genre] = new_logprob
 
@@ -65,7 +74,6 @@ def test_bow(conditional_freqs, genre_freqs, words_by_genre, genre_size, tweets,
 		keys = [x for x,y in logprobs_by_genre.items() if y ==maxx] # here, we return all genres that maximize the probability above 
 													  # (not just the first appearance)
 		test_preds.append(keys)
-		print(keys)
 
 	accuracy_count = 0
 	for i in xrange(len(genres)):
@@ -89,4 +97,6 @@ def train_test_sklearn(genres, tweets):
 	nb.fit(simple_train_dtm, genres[0:390])
 	pred_genres = nb.predict(simple_test_dtm)
 	print(metrics.accuracy_score(genres[390:416], pred_genres))
+
+
 

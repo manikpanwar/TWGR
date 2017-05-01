@@ -107,8 +107,8 @@ def readOutputToMapping():
     # tweet_training = tweets[0:390]
     # genre_testing = genres[390:416]
     # tweet_testing = tweets[390:416]
-    # (cond_freqs, genre_freqs, words_by_genre, genre_size) = tt.train_bow(genre_training, tweet_training)
-    # tt.test_bow(cond_freqs, genre_freqs, words_by_genre, genre_size, tweet_testing, genre_testing)
+    # (cond_freqs, genre_freqs, words_by_genre, genre_size) = tt.train_bow(genre_training, tweet_training, 1)
+    # tt.test_bow(cond_freqs, genre_freqs, words_by_genre, genre_size, tweet_testing, genre_testing, 1)
 
     #########################
     # sklearn bag of words: #
