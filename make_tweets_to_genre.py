@@ -1,3 +1,5 @@
+import matplotlib.pyplot as plt
+
 import getUserTweets as gut 
 import csv
 import train_test as tt
@@ -112,23 +114,105 @@ def readOutputToMapping():
             tweets += [l]
             i = 0
     # genres and tweets are correct form input now to call to train_test
+    return(genres, tweets)
+
+
+
+## Code for making figures: 
+
+    # For comparing our model to sklearn: 
+def compare_sklearn_graph(genres, tweets):
 
     ##############################
     # Our own bag of words code: #
     ##############################
-    # genre_training = genres[0:390]
-    # tweet_training = tweets[0:390]
-    # genre_testing = genres[390:416]
-    # tweet_testing = tweets[390:416]
-    # (cond_freqs, genre_freqs, words_by_genre, genre_size) = tt.train_bow(genre_training, tweet_training, 1)
-    # tt.test_bow(cond_freqs, genre_freqs, words_by_genre, genre_size, tweet_testing, genre_testing, 1)
-
+    our_scatter = []
+    sklearn_scatter = []
+    chances = []
+    for i in xrange(16, 396, 10):
+        genre_training = genres[0:i]
+        tweet_training = tweets[0:i]
+        genre_testing = genres[i:i+20]
+        tweet_testing = tweets[i:i+20]
+        chance = 1/float(len(set(genres[0:i])))
+        (cond_freqs, genre_freqs, words_by_genre, genre_size) = tt.train_bow(genre_training, tweet_training, 1)
+        # print(i)
+        our_accuracy = tt.test_bow(cond_freqs, genre_freqs, words_by_genre, genre_size, tweet_testing, genre_testing, 1)
     #########################
     # sklearn bag of words: #
     #########################
-    # tt.train_test_sklearn(genres, tweets)
+        sklearn_accuracy = tt.train_test_sklearn(genres, tweets, i)
+
+        our_scatter.append(our_accuracy)
+        sklearn_scatter.append(sklearn_accuracy)
+        chances.append(chance)
+    plt.figure()
+    plt.title("Plot of Testing Accuracy Over Time,\nWith Prior Term for Our Model")
+    plt.scatter(range(16, 396, 10), our_scatter, color="blue", label="our accuracy")
+    plt.scatter(range(16, 396, 10), sklearn_scatter, color="red", label="sklearn accuracy")
+    plt.scatter(range(16, 396, 10), chances, color="yellow", label="chance accuracy")
+    plt.legend()
+    plt.xlabel("Size of Entire Dataset (20 Testing and n-20 Training Instances)")
+    plt.ylabel("Testing Accuracy (Percent out of 20 Testing Instances")
+    plt.savefig("Testing_Acc_WithoutPrior.png")
+    plt.show()
 
 
 
-writeToTextFile()
+
+    # For displaying n-gram testing accuracy over time: 
+def display_ngram(genres, tweets):
+
+    ##############################
+    # Our own bag of words code: #
+    ##############################
+    monogram = []
+    bigram = []
+    trigram = []
+    chances = []
+    for i in xrange(16, 396, 10):
+        genre_training = genres[0:i]
+        tweet_training = tweets[0:i]
+        genre_testing = genres[i:i+20]
+        tweet_testing = tweets[i:i+20]
+        chance = 1/float(len(set(genres[0:i])))
+
+        (mono_cond_freqs, mono_genre_freqs, mono_words_by_genre, mono_genre_size) = tt.train_bow(genre_training, tweet_training, 1)
+        # print(i)
+        mono = tt.test_bow(mono_cond_freqs, mono_genre_freqs, mono_words_by_genre, mono_genre_size, tweet_testing, genre_testing, 1)
+
+        (bi_cond_freqs, bi_genre_freqs, bi_words_by_genre, bi_genre_size) = tt.train_bow(genre_training, tweet_training, 2)
+        # print(i)
+        bi = tt.test_bow(bi_cond_freqs, bi_genre_freqs, bi_words_by_genre, bi_genre_size, tweet_testing, genre_testing, 2)
+
+        (tri_cond_freqs, tri_genre_freqs, tri_words_by_genre, tri_genre_size) = tt.train_bow(genre_training, tweet_training, 3)
+        # print(i)
+        tri = tt.test_bow(tri_cond_freqs, tri_genre_freqs, tri_words_by_genre, tri_genre_size, tweet_testing, genre_testing, 3)
+
+        monogram.append(mono)
+        bigram.append(bi)
+        trigram.append(tri)
+        chances.append(chance)
+
+    plt.figure()
+    plt.title("Plot of N-gram Testing Accuracy Over Time")
+    plt.scatter(range(16, 396, 10), monogram, color="red", label="monogram accuracy")
+    plt.scatter(range(16, 396, 10), bigram, color="blue", label="bigram accuracy")
+    plt.scatter(range(16, 396, 10), trigram, color="green", label="trigram accuracy")
+    plt.scatter(range(16, 396, 10), chances, color="yellow", label="chance accuracy")
+    plt.legend()
+    plt.xlabel("Size of Entire Dataset (20 Testing and n-20 Training Instances)")
+    plt.ylabel("Testing Accuracy (Percent out of 20 Testing Instances")
+    plt.savefig("N_gram.png")
+    plt.show()
+
+
+
+# writeToTextFile()
 # readOutputToMapping()
+
+# writeToTextFile()
+
+# display_ngram(*readOutputToMapping())
+
+# compare_sklearn_graph(*readOutputToMapping()) 
