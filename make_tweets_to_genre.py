@@ -1,6 +1,7 @@
 import getUserTweets as gut 
 import csv
 import train_test as tt
+import re
 
 def readFile(filename, mode="rt"):
     # From 15-112 class notes
@@ -44,10 +45,18 @@ def writeCsv(d, users = None):
             spamwriter.writerow([[userId], [genre], [text]])
     print "Made extended-output.csv"
 
+# http://stackoverflow.com/questions/11331982/how-to-remove-any-url-within-a-string-in-python
+def removeUrls(t):
+    return re.sub(r'^https?:\/\/.*[\r\n]*', '', t, flags=re.MULTILINE)
+
+# http://stackoverflow.com/questions/8376691/how-to-remove-hashtag-user-link-of-a-tweet-using-regular-expression
+def removeHashtags(t):
+    return ' '.join(re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t])|(\w+:\/\/\S+)"," ",t).split())
+
 def getTweetsMap():
     d = readCsv()
-    numUsers = 50
-    numWordsPerUser = 100
+    numUsers = 500
+    numWordsPerUser = 200
     users = []
     for userId in d.keys()[:numUsers]:
         val = d[userId]
@@ -55,10 +64,14 @@ def getTweetsMap():
         tweets = gut.getUserTweetsByUserID(userId)
         if tweets == "":
             continue
-        users += [userId]
+        
         tweets = ".".join(tweets.split("\n"))
         t = ' '.join(tweets.split(" ")[:numWordsPerUser])
         # d[userId] = (val, (t.encode('utf-8')).encode('ascii', errors='ignore'))
+        t = removeUrls(t)
+        t = removeHashtags(t)
+        if t == "" or t == "\n": continue
+        users += [userId]
         d[userId] = (val, (t).encode('ascii', errors='ignore'))
         # print ' '.join(tweets.split(" "))
     return d, users
@@ -76,7 +89,7 @@ def writeToTextFile():
         s += str(userId) + "\n"
         s += genre + "\n"
         s += text + "\n"
-    writeFile("extended-output1.txt", s)
+    writeFile("extended-output5.txt", s)
 
 def readOutputToMapping():
     s = readFile("extended-output2.txt")
@@ -117,5 +130,5 @@ def readOutputToMapping():
 
 
 
-# writeToTextFile()
-readOutputToMapping()
+writeToTextFile()
+# readOutputToMapping()
